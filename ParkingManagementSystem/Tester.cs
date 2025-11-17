@@ -1,5 +1,4 @@
 using ParkingManagementSystem.Implementations;
-using ParkingManagementSystem.Models;
 
 namespace ParkingManagementSystem
 {
@@ -15,7 +14,6 @@ namespace ParkingManagementSystem
             var siteA = sites.ElementAt(0);
             var siteB = sites.ElementAt(1);
 
-            System.Console.WriteLine($"len = {sites.Count()}");
 
             var now = DateTimeOffset.UtcNow;
 
@@ -25,11 +23,25 @@ namespace ParkingManagementSystem
                 {
                     Console.WriteLine("Test 1: Valid booking");
                     var ticketId = await bookingService.BookParkingAsync("ABC123", siteA.Id, now.AddHours(1), now.AddHours(5), "1111-2222-3333-4444");
-                    Console.WriteLine($"Ticket booked successfully: {ticketId}\n");
+                    Console.WriteLine("Test 1 : ticket booked done (true)");
+
+                    var ticket = database.GetTickets(t => t.Id.ToString() == ticketId).First();
+
+                    try
+                    {
+                        var extendedTicket = ticket.Extend(ticket.To.AddHours(1), 5m);
+                        await database.SaveTicket(extendedTicket);
+                        Console.WriteLine($"Test 1 : Extend Ticket Done  (true)");
+                    }
+                    catch (Exception ex)
+                    {
+
+                         Console.WriteLine($"Test 1 : Extend Ticket Fail  (false)");
+                    }
                 },
                 async () =>
                 {
-                    Console.WriteLine("Test 2: Invalid plate number (empty)");
+                    Console.WriteLine("Test 2: Invalid plate number");
                     try
                     {
                         await bookingService.BookParkingAsync("", siteA.Id, now.AddHours(1), now.AddHours(5), "1111-2222-3333-4444");
@@ -37,6 +49,7 @@ namespace ParkingManagementSystem
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Expected error: {ex.Message}\n");
+                        Console.WriteLine("Test 2 : Done (true)");
                     }
                 },
                 async () =>
@@ -49,6 +62,7 @@ namespace ParkingManagementSystem
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Expected error: {ex.Message}\n");
+                        Console.WriteLine("Test 3 : Done (true)");
                     }
                 },
                 async () =>
@@ -61,22 +75,26 @@ namespace ParkingManagementSystem
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Expected error: {ex.Message}\n");
+                        Console.WriteLine("Test 4 : Done (true)");
+
                     }
                 },
                 async () =>
                 {
                     Console.WriteLine("Test 5: Booking overlapping tickets");
-                    // First booking
+                    // make valid booking
                     await bookingService.BookParkingAsync("OVER123", siteB.Id, now.AddHours(2), now.AddHours(4), "1111-2222-3333-4444");
 
                     try
                     {
-                        // Overlapping booking
+                        // make an booking that overlap witht the above one
                         await bookingService.BookParkingAsync("OVER123", siteB.Id, now.AddHours(3), now.AddHours(5), "1111-2222-3333-4444");
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Expected error: {ex.Message}\n");
+                        Console.WriteLine("Test 5 : Done (true)");
+
                     }
                 },
                 async () =>
@@ -89,6 +107,8 @@ namespace ParkingManagementSystem
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Expected error: {ex.Message}\n");
+                        Console.WriteLine("Test 6 : Done (true)");
+
                     }
                 },
             };
