@@ -25,7 +25,7 @@ namespace ParkingManagementSystem.Implementations
             var tariff = GetTariff(siteId);
             var amount = tariff.Calculate(TimeOnly.FromDateTime(from), TimeOnly.FromDateTime(to));
 
-            if(amount> 0)
+            if(amount > 0)
             {
                 var paymentResult = await _paymentService.ProcessPaymentAsync(cardNumber, amount);
                 if (!paymentResult.IsSuccessful)

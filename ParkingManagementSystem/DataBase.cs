@@ -29,6 +29,7 @@ namespace ParkingManagementSystem
             return filter == null ? sites : sites.Where(filter);
         }
 
+
         public IEnumerable<Tariff> GetTariffs(Func<Tariff, bool>? filter)
         {
             return filter == null ? tariffs : tariffs.Where(filter);

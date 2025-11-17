@@ -1,32 +1,32 @@
 Tasks
 
-1-make all DateTime UTC time .
+1-make all DateTime UTC time . (10 %)
 
 2-user can extend the Ticket before it expires  or in its graceperiod .the gracePeriod is 10 minutes after the ticket expiration time .
-implement the method 'IsExtendable' and check it in case of Extending.
+implement the method 'IsExtendable' and check it in case of Extending. (10%)
 
 3-we need to persist the Site that the Ticket is issued from .
 u need persist siteId,Long,Lat and link it to Ticket entity .
-the site is mandatory when issuing a ticket .
+the site is mandatory when issuing a ticket . (15%)
 
 we calculate ticket price based on tariff .tariff is defined by siteId and price for the first hour  and
 price for next hours .not all ticket should calculated based on tariff .
-examble )
+examble ) 
 
 if we have a tariff for siteId =1 with first hour price = 5$ and next hours price = 3$ .
 and want to book from 10:00 to 13:00 (3 hours) the price will be 5$ + 3$ + 3$ = 11$ .
 
-4-implement calculate tariff method to calculate the ticket price based on the site tariff and the ticket duration .
-4-persist tariffId in the Ticket entity to know which tariff was used to calculate the ticket price .
+4-implement calculate tariff method to calculate the ticket price based on the site tariff and the ticket duration .(10%)
+5-persist tariffId in the Ticket entity to know which tariff was used to calculate the ticket price .(20%)
 
 5-the from should be less than to datetime when issuing a ticket .
 he/she can not issue a ticket for past time .
 the site should exist when issuing a ticket .
-he can not issue a ticket for more than 24 hours .
-implement all the above validations when issuing a ticket .
+he/she can not issue a ticket for more than 24 hours .
+implement all the above validations when issuing a ticket . (10)
 
 
-6-if the tariff is not defined for the site we should use default tariff amount is 0;
+6-if the tariff is not defined for the site we should use default tariff amount is 0; (15%)
 
 
-
+10 % clean code and best practices
