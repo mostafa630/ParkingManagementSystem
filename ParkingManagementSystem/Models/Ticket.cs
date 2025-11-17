@@ -31,7 +31,7 @@ namespace ParkingManagementSystem.Models
         }
         public Ticket Extend(DateTime newTo, decimal additionalPrice)
         {
-            return new Ticket(this.Id, this.PlateNumber, this.From, newTo, this.Price + additionalPrice,true);
+            return new Ticket(this.Id, this.PlateNumber, this.To, newTo, this.Price + additionalPrice,true);
         }
 
         /// <summary>
