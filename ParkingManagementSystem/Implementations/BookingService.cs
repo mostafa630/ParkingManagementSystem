@@ -1,5 +1,6 @@
 ﻿using ParkingManagementSystem.Abstractions;
 using ParkingManagementSystem.Exceptions;
+using ParkingManagementSystem.Infrastructure;
 using ParkingManagementSystem.Models;
 
 namespace ParkingManagementSystem.Implementations
@@ -7,11 +8,11 @@ namespace ParkingManagementSystem.Implementations
     internal class BookingService : IBookingService
     {
         private readonly IPaymentService _paymentService;
-        private readonly IDataBase _database;
-        public BookingService(IPaymentService paymentService, IDataBase database)
+        private readonly AppDbContext _context;
+        public BookingService(IPaymentService paymentService, AppDbContext context)
         {
             _paymentService = paymentService;
-            _database = database;
+            _context = context;
         }
 
         public async Task<string> BookParkingAsync(string plateNumber, Guid siteId, DateTimeOffset from, DateTimeOffset to, string cardNumber)
@@ -30,10 +31,11 @@ namespace ParkingManagementSystem.Implementations
                 }
             }
 
-            var site = _database.GetSites(s => s.Id == siteId).First();
-            var ticket = Ticket.Create(plateNumber, from, to, amount, site, tariff);
+            var site = _context.Sites.Where(s => s.Id == siteId).First();
+            var ticket = Ticket.Create(plateNumber, from, to, amount, siteId, tariff?.Id);
 
-            await _database.SaveTicket(ticket);
+            _context.Tickets.Add(ticket);
+            _context.SaveChanges();
 
             return ticket.Id.ToString();
         }
@@ -69,13 +71,13 @@ namespace ParkingManagementSystem.Implementations
         }
         private void ValidateSiteExistence(Guid siteId)
         {
-            var site = _database.GetSites(s => s.Id == siteId).FirstOrDefault();
+            var site = _context.Sites.Where(s => s.Id == siteId).FirstOrDefault();
             if (site is null)
                 throw new InvalidSiteException("Ther is no site with that Id");
         }
         private void ValidateOverlappingTickets(Guid siteId, string plateNumber, DateTimeOffset from, DateTimeOffset to)
         {
-            var tickets = _database.GetTickets(t => t.PlateNumber == plateNumber && t.Site.Id == siteId);
+            var tickets = _context.Tickets.Where(t => t.PlateNumber == plateNumber && t.Site.Id == siteId);
 
             foreach (var ticket in tickets)
             {
@@ -89,7 +91,7 @@ namespace ParkingManagementSystem.Implementations
 
         private Tariff GetTariff(Guid siteId)
         {
-            return _database.GetTariffs(null).FirstOrDefault(t => t.Site.Id == siteId);
+            return _context.Tariffs.FirstOrDefault(t => t.Site.Id == siteId);
         }
     }
 }

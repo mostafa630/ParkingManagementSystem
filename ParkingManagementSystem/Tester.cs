@@ -1,16 +1,22 @@
 using ParkingManagementSystem.Implementations;
+using ParkingManagementSystem.Infrastructure;
 
 namespace ParkingManagementSystem
 {
     internal class Tester
     {
+        private readonly AppDbContext _context;
+        public Tester(AppDbContext context)
+        {
+            _context = context;
+        }
+
         public async Task RunTests()
         {
-            var database = new DataBase();
             var paymentService = new PaymentService();
-            var bookingService = new BookingService(paymentService, database);
+            var bookingService = new BookingService(paymentService, _context);
 
-            var sites = database.GetSites(null);
+            var sites = _context.Sites;
             var siteA = sites.ElementAt(0);
             var siteB = sites.ElementAt(1);
 
@@ -25,12 +31,13 @@ namespace ParkingManagementSystem
                     var ticketId = await bookingService.BookParkingAsync("ABC123", siteA.Id, now.AddHours(1), now.AddHours(5), "1111-2222-3333-4444");
                     Console.WriteLine("Test 1 : ticket booked done (true)");
 
-                    var ticket = database.GetTickets(t => t.Id.ToString() == ticketId).First();
+                    var ticket = _context.Tickets.Where(t => t.Id.ToString() == ticketId).First();
 
                     try
                     {
                         var extendedTicket = ticket.Extend(ticket.To.AddHours(1), 5m);
-                        await database.SaveTicket(extendedTicket);
+                         _context.Tickets.Add(extendedTicket);
+                         _context.SaveChanges();
                         Console.WriteLine($"Test 1 : Extend Ticket Done  (true)");
                     }
                     catch (Exception ex)
@@ -120,7 +127,7 @@ namespace ParkingManagementSystem
 
 
             Console.WriteLine("All Tickets in Database:");
-            foreach (var ticket in database.GetTickets(null))
+            foreach (var ticket in _context.Tickets)
             {
                 Console.WriteLine($"Ticket: {ticket.PlateNumber}, Site: {ticket.Site.Name}, From: {ticket.From}, To: {ticket.To}, Amount: {ticket.Price}");
             }

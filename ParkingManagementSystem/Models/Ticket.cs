@@ -4,7 +4,7 @@ namespace ParkingManagementSystem.Models
 {
     internal class Ticket
     {
-        public Ticket(Guid id, string plateNumber, DateTimeOffset from, DateTimeOffset to, decimal price, bool isExtend, Site site, Tariff? tariff)
+        public Ticket(Guid id, string plateNumber, DateTimeOffset from, DateTimeOffset to, decimal price, bool isExtend, Guid siteId, Guid? tariffId)
         {
             Id = id;
             PlateNumber = plateNumber;
@@ -12,8 +12,8 @@ namespace ParkingManagementSystem.Models
             To = to;
             Price = price;
             IsExtend = isExtend;
-            Site = site;
-            Tariff = tariff;
+            SiteId = siteId;
+            TariffId = tariffId ?? Guid.Empty;
         }
 
         public Guid Id { get; private set; }
@@ -22,24 +22,28 @@ namespace ParkingManagementSystem.Models
         public DateTimeOffset To { get; private set; }
         public decimal Price { get; private set; }
         public bool IsExtend { get; private set; }
+        
+        public Guid SiteId { get; set; }
         public Site Site { get; private set; }
-        public Tariff? Tariff { get; private set; } = null;
 
-        public static Ticket Create(string plateNumber, DateTimeOffset from, DateTimeOffset to, decimal price, Site site, Tariff? tariff)
+        public Guid? TariffId { get; set; }
+        public Tariff? Tariff { get; private set; }
+
+        public static Ticket Create(string plateNumber, DateTimeOffset from, DateTimeOffset to, decimal price, Guid siteId, Guid? tariffId)
         {
-            return new Ticket(Guid.NewGuid(), plateNumber, from, to, price, false, site, tariff);
+            return new Ticket(Guid.NewGuid(), plateNumber, from, to, price, false, siteId, tariffId);
         }
         public Ticket Extend(DateTimeOffset newTo, decimal additionalPrice)
         {
             if (!IsExtendable())
                 throw new NonExtendableTicketException("Time now exceeds allowed time to extend the ticket");
 
-            return new Ticket(this.Id, this.PlateNumber, this.To, newTo, additionalPrice, true, this.Site, this.Tariff);
+            return new Ticket(Guid.NewGuid(), this.PlateNumber, this.To, newTo, additionalPrice, true, this.SiteId, this.TariffId);
         }
 
         public bool IsExtendable()
         {
             return DateTimeOffset.UtcNow <= To + TicketSettings.GracePeriod;
-        }
+        } 
     }
 }
